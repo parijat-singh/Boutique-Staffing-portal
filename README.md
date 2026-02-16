@@ -140,4 +140,5 @@ To run the backend test suite:
 
 ## License
 
-[MIT](LICENSE)
+Copyright © 2026 Parijat Singh. All rights reserved.
+This software is proprietary and may only be used by users authorized by Parijat Singh.
