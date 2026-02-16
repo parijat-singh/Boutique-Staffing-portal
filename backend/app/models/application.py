@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, ForeignKey, String, DateTime, Enum, Text, Boolean
+from sqlalchemy import Column, Integer, ForeignKey, String, DateTime, Enum, Text, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.db.base import Base
@@ -24,3 +24,7 @@ class Application(Base):
     
     user = relationship("User", back_populates="applications")
     job = relationship("Job", back_populates="applications")
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'job_id', name='uq_application_user_job'),
+    )

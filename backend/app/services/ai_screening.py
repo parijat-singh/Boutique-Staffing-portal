@@ -71,7 +71,7 @@ class AIScreeningService:
         {nice_to_have_requirements or "None"}
         
         Candidate Resume:
-        {resume_text[:10000]} # Truncate to avoid token limits if necessary, though 4o-mini has high limits.
+        {resume_text}
         """
 
         try:
@@ -88,12 +88,18 @@ class AIScreeningService:
             content = response.choices[0].message.content
             return json.loads(content)
         except Exception as e:
+            error_msg = str(e)
+            if "context_length_exceeded" in error_msg or "string too long" in error_msg:
+                friendly_msg = "Resume is too long for AI analysis. Please manually review."
+            else:
+                friendly_msg = f"AI Evaluation Failed: {error_msg}"
+                
             print(f"Error calling OpenAI: {e}")
             return {
                 "match_count": 0,
                 "total_must_haves": 0,
                 "score": 0,
-                "justification": f"Error during AI evaluation: {str(e)}",
+                "justification": friendly_msg,
                 "gap_analysis": []
             }
 

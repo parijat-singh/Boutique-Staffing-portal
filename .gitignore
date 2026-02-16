@@ -3,3 +3,10 @@ __pycache__/
 .env
 node_modules/
 .DS_Store
+
+# Backend
+backend/uploads/
+*.db
+*.sqlite3
+backend/__pycache__/
+backend/.pytest_cache/

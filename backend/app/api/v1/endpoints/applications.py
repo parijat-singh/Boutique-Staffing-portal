@@ -98,7 +98,9 @@ async def create_application(
     await db.commit()
     await db.refresh(application)
     await db.refresh(job) # Refresh job to ensure back_populates works if needed
+    await db.refresh(current_user) # Refresh user to ensure attributes are loaded
     application.job = job
+    application.user = current_user
     application.ai_analysis_json = ai_result
     
     return application
@@ -149,4 +151,55 @@ async def read_my_applications(
     
     result = await db.execute(stmt)
     applications = result.scalars().all()
+    
+    # Parse JSON for response
+    import json
+    for app in applications:
+        if app.ai_analysis:
+            try:
+                app.ai_analysis_json = json.loads(app.ai_analysis)
+            except:
+                app.ai_analysis_json = None
+                
     return applications
+
+@router.get("/{id}", response_model=ApplicationResponse)
+async def read_application(
+    *,
+    db: AsyncSession = Depends(deps.get_db),
+    id: int,
+    current_user: User = Depends(get_current_user),
+) -> Any:
+    """
+    Get application by ID.
+    Clients/Admins can view any application (or restrict to their jobs).
+    Candidates can view their own.
+    """
+    stmt = select(Application).where(Application.id == id).options(
+        selectinload(Application.job),
+        selectinload(Application.user)
+    )
+    result = await db.execute(stmt)
+    application = result.scalars().first()
+    
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    # Authorization
+    if current_user.role == UserRole.CANDIDATE:
+        if application.user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Not authorized to view this application")
+    elif current_user.role == UserRole.CLIENT:
+        # Check if client owns the job
+        if application.job.owner_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Not authorized to view this application")
+            
+    # Parse JSON
+    import json
+    if application.ai_analysis:
+        try:
+            application.ai_analysis_json = json.loads(application.ai_analysis)
+        except:
+             application.ai_analysis_json = None
+             
+    return application

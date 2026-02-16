@@ -166,7 +166,19 @@ async def read_job_applications(
     # If we want detailed User info, we might need to update the schema or rely on user_id.
     
     from app.models.application import Application
-    stmt = select(Application).where(Application.job_id == id).options(selectinload(Application.user))
+    stmt = select(Application).where(Application.job_id == id).options(
+        selectinload(Application.user),
+        selectinload(Application.job)
+    )
     result = await db.execute(stmt)
     applications = result.scalars().all()
+    
+    import json
+    for app in applications:
+        if app.ai_analysis:
+            try:
+                app.ai_analysis_json = json.loads(app.ai_analysis)
+            except:
+                app.ai_analysis_json = None
+                
     return applications

@@ -14,6 +14,7 @@ import CreateJob from './pages/jobs/CreateJob';
 import EditJob from './pages/jobs/EditJob';
 import JobDetails from './pages/jobs/JobDetails';
 import JobApplicants from './pages/jobs/JobApplicants';
+import ApplicationAnalysis from './pages/applications/ApplicationAnalysis';
 import MyApplications from './pages/applications/MyApplications';
 import ManageUsers from './pages/admin/ManageUsers';
 import ManageRoles from './pages/admin/ManageRoles';
@@ -47,6 +48,7 @@ function App() {
               <Route path="/jobs/:id/edit" element={<EditJob />} />
               <Route path="/jobs/:id" element={<JobDetails />} />
               <Route path="/jobs/:id/applicants" element={<JobApplicants />} />
+              <Route path="/applications/:id/analysis" element={<ApplicationAnalysis />} />
               <Route path="/applications" element={<MyApplications />} />
               <Route path="/admin/users" element={<ManageUsers />} />
               <Route path="/admin/roles" element={<ManageRoles />} />

@@ -2,6 +2,7 @@ from typing import Optional
 from pydantic import BaseModel
 from datetime import datetime
 from app.schemas.job import JobResponse
+from app.schemas.user import UserInDBBase
 
 class ApplicationBase(BaseModel):
     job_id: int
@@ -24,4 +25,5 @@ class ApplicationInDBBase(ApplicationBase):
 
 class ApplicationResponse(ApplicationInDBBase):
     job: Optional[JobResponse] = None
+    user: Optional[UserInDBBase] = None
     ai_analysis_json: Optional[dict] = None # Helper field if we parse it

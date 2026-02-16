@@ -20,6 +20,15 @@ app.add_middleware(
 
 from app.api.v1.api import api_router
 
+from fastapi.staticfiles import StaticFiles
+import os
+
+# Create uploads directory if it doesn't exist
+if not os.path.exists("uploads"):
+    os.makedirs("uploads")
+
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
