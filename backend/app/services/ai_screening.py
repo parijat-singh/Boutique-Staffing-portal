@@ -30,6 +30,72 @@ class AIScreeningService:
         return text
 
     @staticmethod
+    async def evaluate_candidate_with_gemini(
+        resume_text: str,
+        job_title: str,
+        must_have_requirements: str,
+        nice_to_have_requirements: str = None
+    ) -> Dict[str, Any]:
+        """Fallback method using Google Gemini."""
+        import google.generativeai as genai
+        
+        if not settings.GEMINI_API_KEY:
+            return {
+                "match_count": 0,
+                "total_must_haves": 0,
+                "score": 0,
+                "justification": "OpenAI token limit reached. Gemini fallback failed: API Key missing.",
+                "gap_analysis": []
+            }
+            
+        try:
+            genai.configure(api_key=settings.GEMINI_API_KEY)
+            model = genai.GenerativeModel(settings.GEMINI_MODEL)
+            
+            prompt = f"""
+            You are an expert technical recruiter. Evaluate this candidate against the job.
+            
+            Output strictly valid JSON with this structure:
+            {{
+                "match_count": int,
+                "total_must_haves": int,
+                "score": int,
+                "justification": "string",
+                "gap_analysis": [
+                    {{ "requirement": "string", "status": "Missing"|"Weak"|"Match", "note": "string" }}
+                ]
+            }}
+            
+            Job Title: {job_title}
+            Must-Have: {must_have_requirements}
+            Nice-to-Have: {nice_to_have_requirements or "None"}
+            
+            Resume:
+            {resume_text}
+            """
+            
+            response = await model.generate_content_async(prompt)
+            text = response.text.strip()
+            # Clean markdown code blocks if present
+            if text.startswith("```json"):
+                text = text[7:]
+            if text.startswith("```"):
+                text = text[3:]
+            if text.endswith("```"):
+                text = text[:-3]
+                
+            return json.loads(text)
+        except Exception as e:
+            print(f"Error calling Gemini: {e}")
+            return {
+                "match_count": 0,
+                "total_must_haves": 0,
+                "score": 0,
+                "justification": f"Both OpenAI and Gemini failed. Gemini Error: {str(e)}",
+                "gap_analysis": []
+            }
+
+    @staticmethod
     async def evaluate_candidate(
         resume_text: str,
         job_title: str,
@@ -38,6 +104,7 @@ class AIScreeningService:
     ) -> Dict[str, Any]:
         """
         Evaluate a candidate's resume against job requirements using OpenAI.
+        Falls back to Gemini if token limit is exceeded.
         """
         
         system_prompt = """
@@ -89,17 +156,19 @@ class AIScreeningService:
             return json.loads(content)
         except Exception as e:
             error_msg = str(e)
-            if "context_length_exceeded" in error_msg or "string too long" in error_msg:
-                friendly_msg = "Resume is too long for AI analysis. Please manually review."
-            else:
-                friendly_msg = f"AI Evaluation Failed: {error_msg}"
-                
-            print(f"Error calling OpenAI: {e}")
+            print(f"OpenAI Error: {e}")
+            
+            if "context_length_exceeded" in error_msg or "string too long" in error_msg or "rate limit" in error_msg.lower():
+                print("Switching to Gemini Fallback...")
+                return await AIScreeningService.evaluate_candidate_with_gemini(
+                    resume_text, job_title, must_have_requirements, nice_to_have_requirements
+                )
+            
             return {
                 "match_count": 0,
                 "total_must_haves": 0,
                 "score": 0,
-                "justification": friendly_msg,
+                "justification": f"AI Evaluation Failed: {error_msg}",
                 "gap_analysis": []
             }
 

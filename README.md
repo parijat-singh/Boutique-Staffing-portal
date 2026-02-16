@@ -11,6 +11,35 @@ A specialized web portal for boutique staffing solutions, connecting top-tier ca
 - **Application Tracking**: Real-time status updates for applications.
 - **Responsive Design**: Modern, mobile-friendly UI built with React and Vite.
 
+## ⚙️ Configuration
+
+### 1. AI Screening Setup
+The portal uses AI to analyze resumes against job descriptions.
+
+**OpenAI (Primary)**:
+- Obtain an API key from [OpenAI Platform](https://platform.openai.com/).
+- Set `OPENAI_API_KEY` in your `.env` file.
+- Default model: `gpt-4o-mini` (configurable via `OPENAI_MODEL`).
+
+**Google Gemini (Fallback)**:
+- Used automatically if OpenAI hits rate limits or context errors.
+- Obtain an API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+- Set `GEMINI_API_KEY` in your `.env` file.
+- Default model: `gemini-1.5-pro` (configurable via `GEMINI_MODEL`).
+
+### 2. Email Notifications (SMTP)
+Configure SMTP to enable email features (signup welcome, application status updates).
+
+Add the following to your `.env` file (example for Gmail):
+```ini
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASSWORD=your_app_password
+SMTP_FROM_EMAIL=your_email@gmail.com
+```
+*Note: For Gmail, use an [App Password](https://support.google.com/accounts/answer/185833), not your login password.*
+
 ## Prerequisites
 
 - **Docker Desktop** (Recommended for easiest setup)
