@@ -9,6 +9,8 @@ class JobBase(BaseModel):
     nice_to_have_requirements: Optional[str] = None
     location: Optional[str] = None
     salary_range: Optional[str] = None
+    job_type: Optional[str] = None
+    experience_level: Optional[str] = None
     is_active: bool = True
 
 class JobCreate(JobBase):

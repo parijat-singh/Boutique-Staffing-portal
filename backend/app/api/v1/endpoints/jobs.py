@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -40,25 +40,40 @@ async def read_jobs(
     db: AsyncSession = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
+    location: Optional[str] = None,
+    job_type: Optional[str] = None,
+    experience_level: Optional[str] = None,
+    search: Optional[str] = None,
     current_user: User = Depends(get_current_user),
 ) -> Any:
     """
-    Retrieve jobs.
+    Retrieve jobs with advanced filtering.
     """
-    # If client, return only their jobs? Or all jobs?
-    # For now, let's return all jobs for everyone, but we might want to filter later.
-    # Actually, the plan said "Filter by client for Clients" which implies clients see their own.
-    # But usually clients also want to see the general pool? 
-    # Let's stick to: Clients see their own, Candidates see all open.
+    stmt = select(Job)
     
-    stmt = select(Job).offset(skip).limit(limit)
-    
+    # Base authorization filters
     if current_user.role == UserRole.CLIENT:
         stmt = stmt.where(Job.owner_id == current_user.id)
-    
-    if current_user.role == UserRole.CANDIDATE:
+    elif current_user.role == UserRole.CANDIDATE:
         stmt = stmt.where(Job.is_active == True)
 
+    # Advanced filters
+    if location:
+        stmt = stmt.where(Job.location.ilike(f"%{location}%"))
+    if job_type:
+        stmt = stmt.where(Job.job_type == job_type)
+    if experience_level:
+        stmt = stmt.where(Job.experience_level == experience_level)
+    if search:
+        # Simple keyword search in title, description, and requirements
+        stmt = stmt.where(
+            (Job.title.ilike(f"%{search}%")) | 
+            (Job.description.ilike(f"%{search}%")) |
+            (Job.requirements.ilike(f"%{search}%"))
+        )
+
+    stmt = stmt.offset(skip).limit(limit).order_by(Job.created_at.desc())
+    
     result = await db.execute(stmt)
     jobs = result.scalars().all()
     return jobs

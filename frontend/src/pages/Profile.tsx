@@ -94,140 +94,127 @@ const Profile = () => {
 
 
 
-            <div style={{ maxWidth: '640px' }}>
+            <div style={{ maxWidth: 'var(--container-narrow)' }} className="animate-slide-up">
                 {/* Info card */}
-                <div className="card" style={{
-                    marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem',
-                }}>
-                    <div style={{
-                        width: '40px', height: '40px', borderRadius: '50%',
-                        background: 'var(--accent-light)', color: 'var(--accent)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '1rem', fontWeight: 700, flexShrink: 0,
-                    }}>
+                <div className="card profile-card-summary">
+                    <div className="avatar-circle">
                         {(user?.email || '?')[0].toUpperCase()}
                     </div>
-                    <div style={{ fontSize: '0.875rem' }}>
-                        <div style={{ fontWeight: 600, color: 'var(--gray-900)' }}>{user?.email}</div>
-                        <div style={{ color: 'var(--text-light)', textTransform: 'capitalize', fontSize: '0.8125rem' }}>{user?.role}</div>
+                    <div className="profile-info-text">
+                        <div className="email">{user?.email}</div>
+                        <div className="role">{user?.role}</div>
                     </div>
                 </div>
 
                 {message && (
-                    <div className={`alert ${messageType === 'success' ? 'alert-success' : 'alert-error'}`} style={{ marginBottom: '1rem' }}>
+                    <div className={`alert ${messageType === 'success' ? 'alert-success' : 'alert-error'} animate-fade-in`} style={{ marginBottom: '1rem' }}>
                         {message}
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                    <fieldset>
-                        <legend>Identity</legend>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <div style={{ flex: 2 }}>
-                                <label>First Name</label>
-                                <input name="first_name" value={form.first_name} onChange={handleChange} />
-                            </div>
-                            <div style={{ flex: 0.6 }}>
-                                <label>MI</label>
-                                <input name="middle_initial" value={form.middle_initial} onChange={handleChange} maxLength={1} />
-                            </div>
-                            <div style={{ flex: 2 }}>
-                                <label>Last Name</label>
-                                <input name="last_name" value={form.last_name} onChange={handleChange} />
-                            </div>
+                <form onSubmit={handleSubmit} className="form-grid">
+                    <div className="section-title">Identity</div>
+                    <div className="form-grid grid-3">
+                        <div className="form-group" style={{ gridColumn: 'span 1' }}>
+                            <label>First Name</label>
+                            <input name="first_name" value={form.first_name} onChange={handleChange} />
                         </div>
-                    </fieldset>
-
-                    <fieldset>
-                        <legend>Contact</legend>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <div>
-                                <label>Phone Number</label>
-                                <input name="phone_number" type="tel" value={form.phone_number} onChange={handleChange} />
-                            </div>
-                            <div>
-                                <label>Email</label>
-                                <input value={form.email} disabled style={{ background: 'var(--gray-50)', color: 'var(--text-muted)', cursor: 'not-allowed' }} />
-                                <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Email cannot be changed</small>
-                            </div>
+                        <div className="form-group" style={{ gridColumn: 'span 1' }}>
+                            <label>MI</label>
+                            <input name="middle_initial" value={form.middle_initial} onChange={handleChange} maxLength={1} />
                         </div>
-                    </fieldset>
+                        <div className="form-group" style={{ gridColumn: 'span 1' }}>
+                            <label>Last Name</label>
+                            <input name="last_name" value={form.last_name} onChange={handleChange} />
+                        </div>
+                    </div>
 
-                    <fieldset>
-                        <legend>Professional</legend>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            {isCandidate && (
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <div style={{ flex: 1 }}>
-                                        <label>Experience (Years)</label>
-                                        <input name="years_of_experience" type="number" min="0" value={form.years_of_experience} onChange={handleChange} />
-                                    </div>
-                                    <div style={{ flex: 1 }}>
-                                        <label>Work Permit</label>
-                                        <select name="work_permit_type" value={form.work_permit_type} onChange={handleChange}>
-                                            <option value="">Select...</option>
-                                            <option value="US Citizen">US Citizen</option>
-                                            <option value="Green Card">Green Card</option>
-                                            <option value="H1B">H1B</option>
-                                            <option value="L1">L1</option>
-                                            <option value="OPT/CPT">OPT/CPT</option>
-                                            <option value="Other">Other</option>
-                                        </select>
-                                    </div>
+                    <div className="section-title">Contact</div>
+                    <div className="form-grid grid-2">
+                        <div className="form-group">
+                            <label>Phone Number</label>
+                            <input name="phone_number" type="tel" value={form.phone_number} onChange={handleChange} />
+                        </div>
+                        <div className="form-group">
+                            <label>Email</label>
+                            <input value={form.email} disabled className="input-disabled" style={{ background: 'var(--gray-50)', color: 'var(--text-muted)', cursor: 'not-allowed' }} />
+                            <small className="text-muted" style={{ fontSize: '0.75rem' }}>Email cannot be changed</small>
+                        </div>
+                    </div>
+
+                    <div className="section-title">Professional</div>
+                    <div className="form-grid">
+                        {isCandidate && (
+                            <div className="form-grid grid-2">
+                                <div className="form-group">
+                                    <label>Experience (Years)</label>
+                                    <input name="years_of_experience" type="number" min="0" value={form.years_of_experience} onChange={handleChange} />
                                 </div>
-                            )}
-
-                            {isClient && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                    <div>
-                                        <label>Company Name</label>
-                                        <input name="company_name" value={form.company_name} onChange={handleChange} placeholder="Your Company Ltd." />
-                                    </div>
-                                    <div>
-                                        <label>Designation</label>
-                                        <input name="designation" value={form.designation} onChange={handleChange} placeholder="e.g. Hiring Manager" />
-                                    </div>
+                                <div className="form-group">
+                                    <label>Work Permit</label>
+                                    <select name="work_permit_type" value={form.work_permit_type} onChange={handleChange}>
+                                        <option value="">Select...</option>
+                                        <option value="US Citizen">US Citizen</option>
+                                        <option value="Green Card">Green Card</option>
+                                        <option value="H1B">H1B</option>
+                                        <option value="L1">L1</option>
+                                        <option value="OPT/CPT">OPT/CPT</option>
+                                        <option value="Other">Other</option>
+                                    </select>
                                 </div>
-                            )}
-
-                            {isCandidate && (
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <div style={{ flex: 1 }}>
-                                        <label>City</label>
-                                        <input name="city" value={form.city} onChange={handleChange} />
-                                    </div>
-                                    <div style={{ flex: 1 }}>
-                                        <label>State</label>
-                                        <select name="state" value={form.state} onChange={handleChange}>
-                                            <option value="">Select...</option>
-                                            {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                                            <option value="N/A">N/A</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div>
-                                <label>LinkedIn Profile URL</label>
-                                <input name="linkedin_url" type="url" value={form.linkedin_url} onChange={handleChange} placeholder="https://linkedin.com/in/..." />
                             </div>
-                        </div>
-                    </fieldset>
+                        )}
 
-                    <fieldset>
-                        <legend>Security</legend>
-                        <div>
-                            <label>New Password</label>
-                            <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="Leave blank to keep current" />
-                        </div>
-                    </fieldset>
+                        {isClient && (
+                            <div className="form-grid grid-2">
+                                <div className="form-group">
+                                    <label>Company Name</label>
+                                    <input name="company_name" value={form.company_name} onChange={handleChange} placeholder="Your Company Ltd." />
+                                </div>
+                                <div className="form-group">
+                                    <label>Designation</label>
+                                    <input name="designation" value={form.designation} onChange={handleChange} placeholder="e.g. Hiring Manager" />
+                                </div>
+                            </div>
+                        )}
 
-                    <button type="submit" disabled={saving} className="btn btn-primary btn-lg" style={{
-                        width: '100%',
-                        opacity: saving ? 0.7 : 1,
-                    }}>
-                        {saving ? 'Saving...' : 'Save Profile'}
-                    </button>
+                        {isCandidate && (
+                            <div className="form-grid grid-2">
+                                <div className="form-group">
+                                    <label>City</label>
+                                    <input name="city" value={form.city} onChange={handleChange} />
+                                </div>
+                                <div className="form-group">
+                                    <label>State</label>
+                                    <select name="state" value={form.state} onChange={handleChange}>
+                                        <option value="">Select...</option>
+                                        {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                                        <option value="N/A">N/A</option>
+                                    </select>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="form-group">
+                            <label>LinkedIn Profile URL</label>
+                            <input name="linkedin_url" type="url" value={form.linkedin_url} onChange={handleChange} placeholder="https://linkedin.com/in/..." />
+                        </div>
+                    </div>
+
+                    <div className="section-title">Security</div>
+                    <div className="form-group">
+                        <label>New Password</label>
+                        <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="Leave blank to keep current" />
+                    </div>
+
+                    <div style={{ marginTop: '1rem' }}>
+                        <button type="submit" disabled={saving} className={`btn btn-primary btn-lg ${saving ? 'saving-pulse' : ''}`} style={{
+                            width: '100%',
+                            opacity: saving ? 0.7 : 1,
+                        }}>
+                            {saving ? 'Saving...' : 'Save Profile'}
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

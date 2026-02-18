@@ -127,8 +127,7 @@ const JobDetails = () => {
             await client.post('/applications/', payload, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
-            setSuccessMessage('Successfully applied! Redirecting...');
-            setTimeout(() => navigate('/applications'), 2000);
+            setSuccessMessage('Successfully applied!');
         } catch (err: any) {
             if (err.response?.status === 409) {
                 setShowOverwriteConfirm(true);
@@ -204,44 +203,71 @@ const JobDetails = () => {
                     <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Apply for Position</h2>
                     <p style={{ color: 'var(--text-light)', marginBottom: '2rem' }}>Complete your profile and attach your resume.</p>
 
-                    {successMessage && <div className="alert alert-success">{successMessage}</div>}
-                    {applyError && <div className="alert alert-error">{applyError}</div>}
-                    {showOverwriteConfirm && (
-                        <div className="alert alert-warning">
-                            <p style={{ margin: '0 0 1rem 0', fontWeight: 600 }}>You have already applied. Overwrite previous application?</p>
-                            <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                <button onClick={() => submitApplication(true)} className="btn btn-warning">Yes, Overwrite</button>
-                                <button onClick={() => setShowOverwriteConfirm(false)} className="btn btn-secondary">Cancel</button>
+                    {successMessage ? (
+                        <div className="animate-slide-up" style={{ textAlign: 'center', padding: '2rem 1rem' }}>
+                            <div style={{
+                                width: '80px', height: '80px', borderRadius: '50%',
+                                background: 'var(--success-bg)', color: 'var(--success)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                margin: '0 auto 1.5rem', border: '4px solid var(--white)',
+                                boxShadow: 'var(--shadow-md)'
+                            }}>
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            </div>
+                            <h2 style={{ fontSize: '1.75rem', marginBottom: '0.75rem' }}>Application Submitted!</h2>
+                            <p style={{ color: 'var(--text-light)', maxWidth: '400px', margin: '0 auto 2rem', lineHeight: 1.6 }}>
+                                Thank you for your interest in the <strong>{job.title}</strong> position. Our team will review your profile and get back to you soon.
+                            </p>
+                            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                                <button onClick={() => navigate('/dashboard')} className="btn btn-primary">
+                                    Browse More Jobs
+                                </button>
+                                <button onClick={() => navigate('/applications')} className="btn btn-secondary">
+                                    View My Applications
+                                </button>
                             </div>
                         </div>
-                    )}
+                    ) : (
+                        <>
+                            {applyError && <div className="alert alert-error" style={{ marginBottom: '1.5rem' }}>{applyError}</div>}
+                            {showOverwriteConfirm ? (
+                                <div className="alert alert-warning">
+                                    <p style={{ margin: '0 0 1rem 0', fontWeight: 600 }}>You have already applied. Overwrite previous application?</p>
+                                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                        <button onClick={() => submitApplication(true)} className="btn btn-warning">Yes, Overwrite</button>
+                                        <button onClick={() => setShowOverwriteConfirm(false)} className="btn btn-secondary">Cancel</button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <form onSubmit={(e) => { e.preventDefault(); submitApplication(false); }} style={{ display: 'grid', gap: '1.25rem' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 0.7fr 2fr', gap: '1rem' }}>
+                                        <div><label style={{ display: 'block', marginBottom: '0.375rem', fontSize: '0.875rem', fontWeight: 500 }}>First Name *</label><input name="firstName" value={formData.firstName} onChange={handleChange} style={fieldErrors.firstName ? errorStyle : controlStyle} /></div>
+                                        <div><label style={{ display: 'block', marginBottom: '0.375rem', fontSize: '0.875rem', fontWeight: 500 }}>MI</label><input name="middleInitial" value={formData.middleInitial} onChange={handleChange} maxLength={1} style={controlStyle} /></div>
+                                        <div><label style={{ display: 'block', marginBottom: '0.375rem', fontSize: '0.875rem', fontWeight: 500 }}>Last Name *</label><input name="lastName" value={formData.lastName} onChange={handleChange} style={fieldErrors.lastName ? errorStyle : controlStyle} /></div>
+                                    </div>
 
-                    {!successMessage && !showOverwriteConfirm && (
-                        <form onSubmit={(e) => { e.preventDefault(); submitApplication(false); }} style={{ display: 'grid', gap: '1.25rem' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '2fr 0.7fr 2fr', gap: '1rem' }}>
-                                <div><label style={{ display: 'block', marginBottom: '0.375rem', fontSize: '0.875rem', fontWeight: 500 }}>First Name *</label><input name="firstName" value={formData.firstName} onChange={handleChange} style={fieldErrors.firstName ? errorStyle : controlStyle} /></div>
-                                <div><label style={{ display: 'block', marginBottom: '0.375rem', fontSize: '0.875rem', fontWeight: 500 }}>MI</label><input name="middleInitial" value={formData.middleInitial} onChange={handleChange} maxLength={1} style={controlStyle} /></div>
-                                <div><label style={{ display: 'block', marginBottom: '0.375rem', fontSize: '0.875rem', fontWeight: 500 }}>Last Name *</label><input name="lastName" value={formData.lastName} onChange={handleChange} style={fieldErrors.lastName ? errorStyle : controlStyle} /></div>
-                            </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        <div><label style={{ display: 'block', marginBottom: '0.375rem', fontSize: '0.875rem', fontWeight: 500 }}>Email *</label><input name="email" type="email" value={formData.email} onChange={handleChange} style={fieldErrors.email ? errorStyle : controlStyle} /></div>
+                                        <div><label style={{ display: 'block', marginBottom: '0.375rem', fontSize: '0.875rem', fontWeight: 500 }}>Confirm Email *</label><input name="confirmEmail" type="email" value={formData.confirmEmail} onChange={handleChange} style={fieldErrors.confirmEmail ? errorStyle : controlStyle} /></div>
+                                    </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                <div><label style={{ display: 'block', marginBottom: '0.375rem', fontSize: '0.875rem', fontWeight: 500 }}>Email *</label><input name="email" type="email" value={formData.email} onChange={handleChange} style={fieldErrors.email ? errorStyle : controlStyle} /></div>
-                                <div><label style={{ display: 'block', marginBottom: '0.375rem', fontSize: '0.875rem', fontWeight: 500 }}>Confirm Email *</label><input name="confirmEmail" type="email" value={formData.confirmEmail} onChange={handleChange} style={fieldErrors.confirmEmail ? errorStyle : controlStyle} /></div>
-                            </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        <div><label style={{ display: 'block', marginBottom: '0.375rem', fontSize: '0.875rem', fontWeight: 500 }}>Phone *</label><input name="phone" type="tel" value={formData.phone} onChange={handleChange} style={fieldErrors.phone ? errorStyle : controlStyle} /></div>
+                                        <div><label style={{ display: 'block', marginBottom: '0.375rem', fontSize: '0.875rem', fontWeight: 500 }}>LinkedIn URL</label><input name="linkedinUrl" type="url" value={formData.linkedinUrl} onChange={handleChange} style={controlStyle} placeholder="https://..." /></div>
+                                    </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                <div><label style={{ display: 'block', marginBottom: '0.375rem', fontSize: '0.875rem', fontWeight: 500 }}>Phone *</label><input name="phone" type="tel" value={formData.phone} onChange={handleChange} style={fieldErrors.phone ? errorStyle : controlStyle} /></div>
-                                <div><label style={{ display: 'block', marginBottom: '0.375rem', fontSize: '0.875rem', fontWeight: 500 }}>LinkedIn URL</label><input name="linkedinUrl" type="url" value={formData.linkedinUrl} onChange={handleChange} style={controlStyle} placeholder="https://..." /></div>
-                            </div>
+                                    <div style={{ background: 'var(--white)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px dashed var(--gray-300)' }}>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Resume (PDF/DOCX) *</label>
+                                        <input type="file" accept=".pdf,.docx" onChange={e => setResume(e.target.files ? e.target.files[0] : null)} style={{ marginBottom: '0.5rem' }} />
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>Maximum file size: 10MB</div>
+                                    </div>
 
-                            <div style={{ background: 'var(--white)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px dashed var(--gray-300)' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Resume (PDF/DOCX) *</label>
-                                <input type="file" accept=".pdf,.docx" onChange={e => setResume(e.target.files ? e.target.files[0] : null)} style={{ marginBottom: '0.5rem' }} />
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>Maximum file size: 10MB</div>
-                            </div>
-
-                            <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%', marginTop: '1rem' }}>Submit Application</button>
-                        </form>
+                                    <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%', marginTop: '1rem' }}>Submit Application</button>
+                                </form>
+                            )}
+                        </>
                     )}
                 </div>
             )}

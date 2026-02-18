@@ -178,109 +178,134 @@ const Signup = () => {
                     {error && <div className="alert alert-error" style={{ marginBottom: '0.75rem' }}>{error}</div>}
 
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                        {/* Identity */}
-                        <fieldset>
-                            <legend>Identity</legend>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <div style={{ flex: 2 }}>
-                                    <label>First Name {req}</label>
-                                    <input name="first_name" value={formData.first_name} onChange={handleChange} style={inputStyle('first_name')} />
-                                    {err('first_name')}
-                                </div>
-                                <div style={{ flex: 0.6 }}>
-                                    <label>MI</label>
-                                    <input name="middle_initial" value={formData.middle_initial} onChange={handleChange} maxLength={1} />
-                                </div>
-                                <div style={{ flex: 2 }}>
-                                    <label>Last Name {req}</label>
-                                    <input name="last_name" value={formData.last_name} onChange={handleChange} style={inputStyle('last_name')} />
-                                    {err('last_name')}
-                                </div>
+                        <div className="section-title">Identity</div>
+                        <div className="form-grid grid-3">
+                            <div className="form-group" style={{ gridColumn: 'span 1' }}>
+                                <label>First Name {req}</label>
+                                <input name="first_name" value={formData.first_name} onChange={handleChange} style={inputStyle('first_name')} />
+                                {err('first_name')}
                             </div>
-                        </fieldset>
+                            <div className="form-group" style={{ gridColumn: 'span 1' }}>
+                                <label>MI</label>
+                                <input name="middle_initial" value={formData.middle_initial} onChange={handleChange} maxLength={1} />
+                            </div>
+                            <div className="form-group" style={{ gridColumn: 'span 1' }}>
+                                <label>Last Name {req}</label>
+                                <input name="last_name" value={formData.last_name} onChange={handleChange} style={inputStyle('last_name')} />
+                                {err('last_name')}
+                            </div>
+                        </div>
 
                         {/* Professional Info (Client Specific) */}
                         {isClient && (
-                            <fieldset>
-                                <legend>Professional Info</legend>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                    <div><label>Company Name {req}</label><input name="company_name" value={formData.company_name} onChange={handleChange} style={inputStyle('company_name')} placeholder="Your Company Ltd." />{err('company_name')}</div>
-                                    <div><label>Designation / Job Title {req}</label><input name="designation" value={formData.designation} onChange={handleChange} style={inputStyle('designation')} placeholder="e.g. Hiring Manager" />{err('designation')}</div>
+                            <>
+                                <div className="section-title">Professional Info</div>
+                                <div className="form-grid grid-2">
+                                    <div className="form-group">
+                                        <label>Company Name {req}</label>
+                                        <input name="company_name" value={formData.company_name} onChange={handleChange} style={inputStyle('company_name')} placeholder="Your Company Ltd." />
+                                        {err('company_name')}
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Designation {req}</label>
+                                        <input name="designation" value={formData.designation} onChange={handleChange} style={inputStyle('designation')} placeholder="e.g. Hiring Manager" />
+                                        {err('designation')}
+                                    </div>
                                 </div>
-                            </fieldset>
+                            </>
                         )}
 
                         {/* Account */}
-                        <fieldset>
-                            <legend>Account</legend>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <div style={{ flex: 1 }}><label>Email {req}</label><input name="email" type="email" value={formData.email} onChange={handleChange} style={inputStyle('email')} placeholder="name@company.com" />{err('email')}</div>
-                                    <div style={{ flex: 1 }}><label>Confirm Email {req}</label><input name="confirmEmail" type="email" value={formData.confirmEmail} onChange={handleChange} style={inputStyle('confirmEmail')} />{err('confirmEmail')}</div>
-                                </div>
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <div style={{ flex: 1 }}><label>Password {req}</label><input name="password" type="password" value={formData.password} onChange={handleChange} style={inputStyle('password')} placeholder="Min 6 characters" />{err('password')}</div>
-                                    <div style={{ flex: 1 }}><label>Confirm Password {req}</label><input name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleChange} style={inputStyle('confirmPassword')} />{err('confirmPassword')}</div>
-                                </div>
+                        <div className="section-title">Account</div>
+                        <div className="form-grid grid-2">
+                            <div className="form-group">
+                                <label>Email {req}</label>
+                                <input name="email" type="email" value={formData.email} onChange={handleChange} style={inputStyle('email')} placeholder="name@company.com" />
+                                {err('email')}
                             </div>
-                        </fieldset>
+                            <div className="form-group">
+                                <label>Confirm Email {req}</label>
+                                <input name="confirmEmail" type="email" value={formData.confirmEmail} onChange={handleChange} style={inputStyle('confirmEmail')} />
+                                {err('confirmEmail')}
+                            </div>
+                            <div className="form-group">
+                                <label>Password {req}</label>
+                                <input name="password" type="password" value={formData.password} onChange={handleChange} style={inputStyle('password')} placeholder="Min 6 characters" />
+                                {err('password')}
+                            </div>
+                            <div className="form-group">
+                                <label>Confirm Password {req}</label>
+                                <input name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleChange} style={inputStyle('confirmPassword')} />
+                                {err('confirmPassword')}
+                            </div>
+                        </div>
 
                         {/* Contact */}
-                        <fieldset>
-                            <legend>Contact</legend>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                <div><label>Phone Number {req}</label><input name="phone_number" type="tel" value={formData.phone_number} onChange={handleChange} style={inputStyle('phone_number')} placeholder="(555) 123-4567" />{err('phone_number')}</div>
-
-                                {!isClient && (
-                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                        <div style={{ flex: 1 }}><label>City</label><input name="city" value={formData.city} onChange={handleChange} style={inputStyle('city')} />{err('city')}</div>
-                                        <div style={{ flex: 1 }}>
-                                            <label>State</label>
-                                            <select name="state" value={formData.state} onChange={handleChange} style={inputStyle('state')}>
-                                                <option value="">Select...</option>
-                                                {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                                                <option value="N/A">N/A</option>
-                                            </select>
-                                            {err('state')}
-                                        </div>
-                                    </div>
-                                )}
+                        <div className="section-title">Contact</div>
+                        <div className="form-grid grid-2">
+                            <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                                <label>Phone Number {req}</label>
+                                <input name="phone_number" type="tel" value={formData.phone_number} onChange={handleChange} style={inputStyle('phone_number')} placeholder="(555) 123-4567" />
+                                {err('phone_number')}
                             </div>
-                        </fieldset>
+
+                            {!isClient && (
+                                <div className="form-grid grid-2" style={{ gridColumn: 'span 2' }}>
+                                    <div className="form-group">
+                                        <label>City</label>
+                                        <input name="city" value={formData.city} onChange={handleChange} style={inputStyle('city')} />
+                                        {err('city')}
+                                    </div>
+                                    <div className="form-group">
+                                        <label>State</label>
+                                        <select name="state" value={formData.state} onChange={handleChange} style={inputStyle('state')}>
+                                            <option value="">Select...</option>
+                                            {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                                            <option value="N/A">N/A</option>
+                                        </select>
+                                        {err('state')}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
 
                         {/* Professional (Candidate Specific) */}
                         {!isClient && (
-                            <fieldset>
-                                <legend>Professional</legend>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                        <div style={{ flex: 1 }}>
-                                            <label>Experience (Years) {req}</label>
-                                            <input name="years_of_experience" type="number" min="0" max="50" value={formData.years_of_experience} onChange={handleChange} style={inputStyle('years_of_experience')} placeholder="0–50" />
-                                            {err('years_of_experience')}
-                                        </div>
-                                        <div style={{ flex: 1 }}>
-                                            <label>Work Permit {req}</label>
-                                            <select name="work_permit_type" value={formData.work_permit_type} onChange={handleChange} style={inputStyle('work_permit_type')}>
-                                                <option value="">Select...</option>
-                                                <option value="US Citizen">US Citizen</option>
-                                                <option value="Green Card">Green Card</option>
-                                                <option value="H1B">H1B</option>
-                                                <option value="L1">L1</option>
-                                                <option value="OPT/CPT">OPT/CPT</option>
-                                                <option value="Other">Other</option>
-                                            </select>
-                                            {err('work_permit_type')}
-                                        </div>
+                            <>
+                                <div className="section-title">Professional</div>
+                                <div className="form-grid grid-2">
+                                    <div className="form-group">
+                                        <label>Experience (Years) {req}</label>
+                                        <input name="years_of_experience" type="number" min="0" max="50" value={formData.years_of_experience} onChange={handleChange} style={inputStyle('years_of_experience')} placeholder="0–50" />
+                                        {err('years_of_experience')}
                                     </div>
-                                    <div><label>LinkedIn URL {req}</label><input name="linkedin_url" type="url" value={formData.linkedin_url} onChange={handleChange} style={inputStyle('linkedin_url')} placeholder="https://linkedin.com/in/yourname" />{err('linkedin_url')}</div>
+                                    <div className="form-group">
+                                        <label>Work Permit {req}</label>
+                                        <select name="work_permit_type" value={formData.work_permit_type} onChange={handleChange} style={inputStyle('work_permit_type')}>
+                                            <option value="">Select...</option>
+                                            <option value="US Citizen">US Citizen</option>
+                                            <option value="Green Card">Green Card</option>
+                                            <option value="H1B">H1B</option>
+                                            <option value="L1">L1</option>
+                                            <option value="OPT/CPT">OPT/CPT</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                        {err('work_permit_type')}
+                                    </div>
+                                    <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                                        <label>LinkedIn URL {req}</label>
+                                        <input name="linkedin_url" type="url" value={formData.linkedin_url} onChange={handleChange} style={inputStyle('linkedin_url')} placeholder="https://linkedin.com/in/yourname" />
+                                        {err('linkedin_url')}
+                                    </div>
                                 </div>
-                            </fieldset>
+                            </>
                         )}
 
-                        <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%', background: isClient ? 'var(--info)' : 'var(--success)' }}>
-                            {isClient ? 'Register Employer' : 'Create Candidate Account'}
-                        </button>
+                        <div style={{ marginTop: '1rem' }}>
+                            <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%', background: isClient ? 'var(--info)' : 'var(--success)' }}>
+                                {isClient ? 'Register Employer' : 'Create Candidate Account'}
+                            </button>
+                        </div>
                     </form>
 
                     <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.85rem', color: 'var(--text-light)' }}>
