@@ -1,22 +1,40 @@
 steps:
+  # 0. Run Backend Tests
+  - name: 'python:3.10-slim'
+    id: 'run-tests'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        pip install -r backend/requirements.txt
+        export DATABASE_URL="sqlite+aiosqlite:///./test.db"
+        export SECRET_KEY="test-secret-key"
+        cd backend && pytest
+
   # 1. Build Backend Image
   - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-backend'
+    waitFor: ['run-tests']
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/boutique-backend', './backend']
   
   # 2. Push Backend Image
   - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-backend'
     args: ['push', 'gcr.io/$PROJECT_ID/boutique-backend']
 
   # 3. Build Frontend Image
   - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-frontend'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/boutique-frontend', '--build-arg', 'VITE_API_URL=${_BACKEND_URL}', './frontend']
 
   # 4. Push Frontend Image
   - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-frontend'
     args: ['push', 'gcr.io/$PROJECT_ID/boutique-frontend']
 
   # 5. Deploy Backend to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-backend'
     entrypoint: gcloud
     args:
       - 'run'
@@ -36,6 +54,7 @@ steps:
 
   # 6. Deploy Frontend to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-frontend'
     entrypoint: gcloud
     args:
       - 'run'
