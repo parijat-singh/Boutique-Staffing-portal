@@ -22,10 +22,8 @@ RUN pip install -r requirements.txt
 # Copy the current directory contents into the container at /app
 COPY . /app/
 
-# Expose port 8000
-EXPOSE 8000
+# Expose port (Cloud Run will override this, but 8080 is the default)
+EXPOSE 8080
 
-# Command to run the application
-# We use a start script or direct command. 
-# Let's use uvicorn directly for simplicity, but in prod maybe gunicorn.
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Use the PORT environment variable provided by Cloud Run
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}"]
