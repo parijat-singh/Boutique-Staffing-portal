@@ -1,17 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from tests.conftest import make_candidate_payload
-
-
-async def get_auth_headers(client: AsyncClient, email: str, role: str):
-    """Register a user and return auth headers."""
-    await client.post("/api/v1/auth/signup", json=make_candidate_payload(email, role=role))
-    login_response = await client.post(
-        f"/api/v1/auth/login/access-token?role={role}",
-        data={"username": email, "password": "password123"}
-    )
-    token = login_response.json()["access_token"]
-    return {"Authorization": f"Bearer {token}"}
+from tests.conftest import make_candidate_payload, get_auth_headers
 
 
 # ───────────────────────────────────────────────────

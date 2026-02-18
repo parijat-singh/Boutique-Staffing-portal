@@ -4,29 +4,7 @@ from unittest.mock import patch
 import json
 import io
 
-# Helper functions (copied from test_applications.py or imported if possible)
-async def get_auth_headers(client: AsyncClient, email: str, role: str):
-    """Register a user and return auth headers."""
-    # Try login first in case user exists
-    login_response = await client.post(
-        f"/api/v1/auth/login/access-token",
-        data={"username": email, "password": "password123"}
-    )
-    if login_response.status_code == 200:
-        token = login_response.json()["access_token"]
-        return {"Authorization": f"Bearer {token}"}
-        
-    # Signup if not exists
-    from tests.conftest import make_candidate_payload, make_client_payload
-    payload = make_candidate_payload(email, role=role) if role == "candidate" else make_client_payload(email)
-    await client.post("/api/v1/auth/signup", json=payload)
-    
-    login_response = await client.post(
-        f"/api/v1/auth/login/access-token",
-        data={"username": email, "password": "password123"}
-    )
-    token = login_response.json()["access_token"]
-    return {"Authorization": f"Bearer {token}"}
+from tests.conftest import get_auth_headers
 
 async def create_job(client: AsyncClient, headers: dict, title: str = "Test Job") -> int:
     response = await client.post("/api/v1/jobs/", json={

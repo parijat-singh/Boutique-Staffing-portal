@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from tests.api.v1.test_jobs import get_auth_headers
+from tests.conftest import get_auth_headers
 
 @pytest.mark.asyncio
 async def test_job_filtering_combined(client: AsyncClient):

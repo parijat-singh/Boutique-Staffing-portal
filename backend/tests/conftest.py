@@ -95,3 +95,44 @@ def make_client_payload(email: str, password: str = "password123", **overrides):
     }
     base.update(overrides)
     return base
+
+
+async def get_auth_headers(client: AsyncClient, email: str, role: str):
+    """Register a user and return auth headers. Shared helper for all tests."""
+    # Try login first in case user exists
+    login_response = await client.post(
+        f"/api/v1/auth/login/access-token?role={role}",
+        data={"username": email, "password": "password123"}
+    )
+    if login_response.status_code == 200:
+        token = login_response.json()["access_token"]
+        return {"Authorization": f"Bearer {token}"}
+        
+    # Signup if not exists
+    if role == "client":
+        payload = make_client_payload(email)
+    else:
+        payload = make_candidate_payload(email, role=role)
+        
+    signup_response = await client.post("/api/v1/auth/signup", json=payload)
+    if signup_response.status_code != 200:
+        # Debugging: show the error if signup fails in CI
+        try:
+            detail = signup_response.json()
+        except:
+            detail = signup_response.text
+        print(f"DEBUG: Signup failed for {email} ({role}). Status: {signup_response.status_code}. Detail: {detail}")
+    
+    login_response = await client.post(
+        f"/api/v1/auth/login/access-token?role={role}",
+        data={"username": email, "password": "password123"}
+    )
+    if login_response.status_code != 200:
+        try:
+            detail = login_response.json()
+        except:
+            detail = login_response.text
+        print(f"DEBUG: Login failed for {email} ({role}) after signup. Status: {login_response.status_code}. Detail: {detail}")
+        
+    token = login_response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
