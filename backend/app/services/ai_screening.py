@@ -5,9 +5,16 @@ import pypdf
 from openai import AsyncOpenAI
 from app.core.config import settings
 
-client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
-
 class AIScreeningService:
+    def __init__(self):
+        self._client = None
+
+    @property
+    def client(self):
+        if self._client is None:
+            from openai import AsyncOpenAI
+            self._client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        return self._client
     @staticmethod
     def extract_text(file_content: bytes, filename: str) -> str:
         """Extract text from PDF or DOCX file."""
@@ -95,8 +102,8 @@ class AIScreeningService:
                 "gap_analysis": []
             }
 
-    @staticmethod
     async def evaluate_candidate(
+        self,
         resume_text: str,
         job_title: str,
         must_have_requirements: str,
@@ -142,7 +149,7 @@ class AIScreeningService:
         """
 
         try:
-            response = await client.chat.completions.create(
+            response = await self.client.chat.completions.create(
                 model=settings.OPENAI_MODEL,
                 messages=[
                     {"role": "system", "content": system_prompt},

@@ -9,6 +9,8 @@ steps:
         pip install -r backend/requirements.txt
         export DATABASE_URL="sqlite+aiosqlite:///./test.db"
         export SECRET_KEY="test-secret-key"
+        export OPENAI_API_KEY="sk-dummy"
+        export GEMINI_API_KEY="dummy"
         export PYTHONPATH=.
         cd backend && pytest
 

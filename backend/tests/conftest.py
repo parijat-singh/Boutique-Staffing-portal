@@ -1,3 +1,4 @@
+from unittest.mock import patch
 import asyncio
 import pytest
 from typing import AsyncGenerator
@@ -50,6 +51,18 @@ async def client(db_session) -> AsyncGenerator[AsyncClient, None]:
         yield c
     app.dependency_overrides.clear()
 
+
+@pytest.fixture(scope="session", autouse=True)
+def mock_ai_screening():
+    with patch("app.services.ai_screening.ai_screening_service.evaluate_candidate") as mock:
+        mock.return_value = {
+            "match_count": 1,
+            "total_must_haves": 1,
+            "score": 100,
+            "justification": "Mocked validation",
+            "gap_analysis": []
+        }
+        yield mock
 
 def make_candidate_payload(email: str, password: str = "password123", role: str = "candidate", **overrides):
     """Build a valid signup payload with all required fields."""
