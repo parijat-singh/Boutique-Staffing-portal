@@ -38,4 +38,4 @@ echo -n "your-gemini-key" | gcloud secrets create GEMINI_API_KEY --data-file=-
 echo -n "some-random-secret-key" | gcloud secrets create SECRET_KEY --data-file=-
 
 echo "Setup Complete! You can now run Cloud Build to deploy your application."
-echo "Command: gcloud builds submit --config cloudbuild.yaml --substitutions=_INSTANCE_CONNECTION_NAME=$(gcloud sql instances describe $DB_INSTANCE_NAME --format='value(connectionName)'),_DATABASE_URL='postgresql+asyncpg://postgres:$DB_PASSWORD@localhost/staffing_db',_SECRET_KEY='your-secret-key'"
+echo "Command: gcloud builds submit --config cloudbuild.yaml --substitutions=_INSTANCE_CONNECTION_NAME=\$(gcloud sql instances describe $DB_INSTANCE_NAME --format='value(connectionName)'),_DATABASE_URL='postgresql+asyncpg://postgres:$DB_PASSWORD@/staffing_db?host=/cloudsql/\$(gcloud sql instances describe $DB_INSTANCE_NAME --format='value(connectionName)')',_SECRET_KEY='your-secret-key'"

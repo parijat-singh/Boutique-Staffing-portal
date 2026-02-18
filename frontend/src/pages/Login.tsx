@@ -33,9 +33,13 @@ const Login = () => {
             await login(response.data.access_token);
             navigate('/dashboard');
         } catch (err: any) {
-            console.error(err);
-            if (err.response?.data?.detail) {
+            console.error('Login error:', err);
+            if (err.response?.status === 500) {
+                setError('Internal Server Error. This usually indicates a database connection issue.');
+            } else if (err.response?.data?.detail) {
                 setError(err.response.data.detail);
+            } else if (err.message === 'Network Error') {
+                setError('Network Error. Please check if the backend is running.');
             } else {
                 setError('Invalid credentials');
             }
