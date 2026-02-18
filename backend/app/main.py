@@ -1,6 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.api import deps
 from app.core.config import settings
 from app.db.init_db import init_db
 from app.db.session import engine
@@ -40,6 +42,11 @@ def read_root():
     return {"message": "Welcome to Boutique Staffing Portal API"}
 
 @app.get("/health")
-def health_check():
-    return {"status": "ok", "db_url": settings.DATABASE_URL}
+async def health_check(db: AsyncSession = Depends(deps.get_db)):
+    try:
+        from sqlalchemy import text
+        await db.execute(text("SELECT 1"))
+        return {"status": "ok", "db_connection": "connected"}
+    except Exception as e:
+        return {"status": "error", "db_connection": "failed", "error": str(e), "db_url": settings.DATABASE_URL}
 
