@@ -9,7 +9,7 @@ steps:
         pip install -r backend/requirements.txt
         export DATABASE_URL="sqlite+aiosqlite:///./test.db"
         export SECRET_KEY="test-secret-key"
-        export PYTHONPATH=$PYTHONPATH:.
+        export PYTHONPATH=.
         cd backend && pytest
 
   # 1. Build Backend Image
