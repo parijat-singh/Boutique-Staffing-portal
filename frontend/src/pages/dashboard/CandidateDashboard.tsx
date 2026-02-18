@@ -59,7 +59,7 @@ const CandidateDashboard = () => {
             <div className="page-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <h1>Open Positions</h1>
-                    <span className="badge badge-success" style={{ fontSize: '0.65rem' }}>Live v1.2.9</span>
+                    <span className="badge badge-success" style={{ fontSize: '0.65rem' }}>Live v1.3.0</span>
                 </div>
                 <p className="subtitle">Browse and apply to available opportunities</p>
             </div>

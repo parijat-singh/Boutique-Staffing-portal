@@ -38,5 +38,5 @@ echo -n "your-gemini-key" | gcloud secrets create GEMINI_API_KEY --data-file=-
 echo -n "some-random-secret-key" | gcloud secrets create SECRET_KEY --data-file=-
 
 echo "Setup Complete! You can now run Cloud Build to deploy your application."
-echo "Command: gcloud builds submit --config cloudbuild.yaml --substitutions=_INSTANCE_CONNECTION_NAME=\$(gcloud sql instances describe $DB_INSTANCE_NAME --format='value(connectionName)'),_DATABASE_URL='postgresql+asyncpg://postgres:$DB_PASSWORD@/staffing_db?host=/cloudsql/\$(gcloud sql instances describe $DB_INSTANCE_NAME --format='value(connectionName)')',_SECRET_KEY='your-secret-key',_BACKEND_URL='https://boutique-backend-xxxx-uc.a.run.app'"
+echo "Command: gcloud builds submit --config cloudbuild.yaml --substitutions=_INSTANCE_CONNECTION_NAME=\$(gcloud sql instances describe $DB_INSTANCE_NAME --format='value(connectionName)'),_DATABASE_URL='postgresql+asyncpg://postgres:$DB_PASSWORD@/staffing_db?host=/cloudsql/\$(gcloud sql instances describe $DB_INSTANCE_NAME --format='value(connectionName)')',_SECRET_KEY='your-secret-key',_BACKEND_URL='https://boutique-backend-xxxx-uc.a.run.app',_OPENAI_API_KEY='sk-your-key',_GEMINI_API_KEY='your-key'"
 echo "TIP: You can find your backend URL in the Cloud Run console after your first deployment."
