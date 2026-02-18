@@ -71,3 +71,6 @@ steps:
 images:
   - 'gcr.io/$PROJECT_ID/boutique-backend'
   - 'gcr.io/$PROJECT_ID/boutique-frontend'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
