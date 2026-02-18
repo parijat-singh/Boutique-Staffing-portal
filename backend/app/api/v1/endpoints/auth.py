@@ -24,9 +24,9 @@ async def login_access_token(
 ) -> Any:
     """
     OAuth2 compatible token login, get an access token for future requests.
-    Now accepts an optional 'role' query parameter to distinguish users with the same email.
     """
-    stmt = select(User).where(User.email == form_data.username)
+    email = form_data.username.lower().strip()
+    stmt = select(User).where(User.email == email)
     
     if role:
         try:
@@ -38,9 +38,15 @@ async def login_access_token(
     result = await db.execute(stmt)
     user = result.scalars().first()
     
-    if not user or not security.verify_password(form_data.password, user.hashed_password):
+    if not user:
+        print(f"DEBUG: Login failed - User not found: {email} with role: {role}")
         raise HTTPException(status_code=400, detail="Incorrect email or password")
-    elif not user.is_active:
+        
+    if not security.verify_password(form_data.password, user.hashed_password):
+        print(f"DEBUG: Login failed - Password mismatch for: {email}")
+        raise HTTPException(status_code=400, detail="Incorrect email or password")
+        
+    if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -58,10 +64,10 @@ async def signup(
     user_in: UserCreate,
 ) -> Any:
     """
-    Create new user without the need to be logged in.
-    Now checks (email, role) uniqueness instead of email alone.
+    Create new user. Normalizes email to lowercase.
     """
-    stmt = select(User).where(User.email == user_in.email, User.role == user_in.role)
+    email = user_in.email.lower().strip()
+    stmt = select(User).where(User.email == email, User.role == user_in.role)
     result = await db.execute(stmt)
     user = result.scalars().first()
     if user:
@@ -71,7 +77,7 @@ async def signup(
         )
     
     user = User(
-        email=user_in.email,
+        email=email,
         hashed_password=security.get_password_hash(user_in.password),
         role=user_in.role,
         is_active=True,
@@ -123,11 +129,13 @@ async def reset_password(
     except ValueError:
         raise HTTPException(status_code=400, detail=f"Invalid role: {body.role}")
 
-    stmt = select(User).where(User.email == body.email, User.role == user_role)
+    email = body.email.lower().strip()
+    stmt = select(User).where(User.email == email, User.role == user_role)
     result = await db.execute(stmt)
     user = result.scalars().first()
 
     if not user:
+        print(f"DEBUG: Password reset failed - User not found: {email} with role: {body.role}")
         raise HTTPException(status_code=404, detail="No account found with that email and role")
 
     # Generate temporary password
