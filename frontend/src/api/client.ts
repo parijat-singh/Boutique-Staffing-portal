@@ -16,4 +16,6 @@ const client = axios.create({
     },
 });
 
+console.log('API Client initialized with baseURL:', client.defaults.baseURL);
+
 export default client;
