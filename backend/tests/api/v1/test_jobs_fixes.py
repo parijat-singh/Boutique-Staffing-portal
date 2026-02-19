@@ -1,7 +1,7 @@
-
 import pytest
 from httpx import AsyncClient
 from app.models.user import UserRole
+from tests.conftest import get_auth_headers
 
 # -----------------------------------------------------------------------------
 # Test Data Setup Helpers
@@ -155,6 +155,7 @@ async def test_application_list_access(client: AsyncClient):
     # Create Job and Apply
     job = await create_job(client, client_headers, "App Test Job", is_active=True)
     job_id = job["id"]
+    await apply_to_job(client, candidate_headers, job_id)
     
     # 1. Admin Access
     res = await client.get(f"/api/v1/jobs/{job_id}/applications", headers=admin_headers)
@@ -216,47 +217,5 @@ async def test_admin_manage_jobs(client: AsyncClient):
     res = await client.get(f"/api/v1/jobs/{job_id}", headers=admin_headers)
     assert res.status_code == 404
 
-# -----------------------------------------------------------------------------
-# Helpers Inlined to avoid conftest import issues
-# -----------------------------------------------------------------------------
-import json
-
-async def get_auth_headers(client: AsyncClient, email: str, role: str):
-    """Register a user and return auth headers."""
-    # Try login first
-    login_response = await client.post(
-        f"/api/v1/auth/login/access-token?role={role}",
-        data={"username": email, "password": "password123"}
-    )
-    if login_response.status_code == 200:
-        token = login_response.json()["access_token"]
-        return {"Authorization": f"Bearer {token}"}
-        
-    # Signup if not exists
-    if role == "client":
-        payload = {
-            "email": email, "password": "password123", "role": "client",
-            "first_name": "Test", "last_name": "Client", "phone_number": "5551234567",
-            "company_name": "Corp", "designation": "Mgr"
-        }
-    else:
-        payload = {
-            "email": email, "password": "password123", "role": role,
-            "first_name": "Test", "last_name": "Cand", "phone_number": "5551234567",
-            "years_of_experience": 5, "work_permit_type": "US", "linkedin_url": "https://linkedin.com/in/testuser"
-        }
-        
-    resp = await client.post("/api/v1/auth/signup", json=payload)
-    if resp.status_code != 200:
-        print(f"DEBUG: Signup failed: {resp.status_code} - {resp.text}")
-    
-    # Login again
-    login_response = await client.post(
-        f"/api/v1/auth/login/access-token?role={role}",
-        data={"username": email, "password": "password123"}
-    )
-    if login_response.status_code != 200:
-        print(f"DEBUG: Login failed: {login_response.status_code} - {login_response.text}")
-        
-    token = login_response.json()["access_token"]
-    return {"Authorization": f"Bearer {token}"}
+# Helpers are now imported from conftest or available via fixtures
+# We need to make sure we use the shared get_auth_headers which is more robust
