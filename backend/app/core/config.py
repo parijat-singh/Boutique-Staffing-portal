@@ -31,6 +31,10 @@ class Settings(BaseSettings):
     SMTP_USER: Optional[str] = None
     SMTP_PASSWORD: Optional[str] = None
     SMTP_FROM_EMAIL: Optional[str] = None
+
+    # First Superuser (for initial setup)
+    FIRST_SUPERUSER: Optional[str] = None
+    FIRST_SUPERUSER_PASSWORD: Optional[str] = None
     
     class Config:
         env_file = ".env"
