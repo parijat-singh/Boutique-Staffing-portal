@@ -14,7 +14,20 @@ steps:
         export PYTHONPATH=.
         cd backend && pytest
 
-  # 1. Build Backend Image
+  # 1. Security Scanning (Backend)
+  - name: 'python:3.10-slim'
+    id: 'backend-security-scan'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        pip install bandit pip-audit
+        # Run bandit for SAST (ignoring B104 for binding to all interfaces in container)
+        bandit -r backend/app -s B104
+        # Run pip-audit for dependencies
+        pip-audit -r backend/requirements.txt
+
+  # 2. Build Backend Image
   - name: 'gcr.io/cloud-builders/docker'
     id: 'build-backend'
     waitFor: ['run-tests']
@@ -24,6 +37,17 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     id: 'push-backend'
     args: ['push', 'gcr.io/$PROJECT_ID/boutique-backend']
+
+  # 3. Security Scanning (Frontend)
+  - name: 'node:18'
+    id: 'frontend-security-scan'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        cd frontend
+        # Fail if there are high/critical vulnerabilities
+        npm audit --audit-level=high
 
   # 3. Build Frontend Image
   - name: 'gcr.io/cloud-builders/docker'
