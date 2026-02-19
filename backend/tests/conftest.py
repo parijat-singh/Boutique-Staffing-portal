@@ -15,7 +15,7 @@ from app.core.config import settings
 # For simplicity with async, we use the same DB but ideally should use a test DB.
 # WARNING: This might wipe data if we aren't careful. 
 # Better to use a separate test.db
-TEST_DATABASE_URL = "sqlite+aiosqlite:///./test.db"
+TEST_DATABASE_URL = "sqlite+aiosqlite:///./test_suite.db"
 
 engine = create_async_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)

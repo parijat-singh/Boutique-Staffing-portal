@@ -60,6 +60,33 @@ async def seed_data():
         else:
             print("Candidate user already exists.")
 
+        # Create sample job
+        from app.models.job import Job
+        stmt = select(Job).where(Job.title == "Senior Developer")
+        result = await db.execute(stmt)
+        job = result.scalars().first()
+        
+        if not job:
+             stmt = select(User).where(User.email == "client@bsportal.com")
+             result = await db.execute(stmt)
+             client_user = result.scalars().first()
+             
+             if client_user:
+                 print("Creating sample job...")
+                 job = Job(
+                     title="Senior Developer",
+                     description="We are looking for an experienced developer.",
+                     owner_id=client_user.id,
+                     is_active=True,
+                     location="Remote",
+                     salary_range="$120k - $150k",
+                     job_type="Full-time",
+                     experience_level="Senior"
+                 )
+                 db.add(job)
+                 await db.commit()
+                 print("Sample job created.")
+
 if __name__ == "__main__":
     asyncio.run(seed_data())
 

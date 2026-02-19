@@ -33,6 +33,12 @@ async def create_job(
     db.add(job)
     await db.commit()
     await db.refresh(job)
+    
+    # Fetch with owner to ensure response model can validate it
+    stmt = select(Job).options(selectinload(Job.owner)).where(Job.id == job.id)
+    result = await db.execute(stmt)
+    job = result.scalars().first()
+    
     return job
 
 @router.get("/", response_model=List[JobResponse])
@@ -44,6 +50,8 @@ async def read_jobs(
     job_type: Optional[str] = None,
     experience_level: Optional[str] = None,
     search: Optional[str] = None,
+    is_active: Optional[bool] = None,
+    owner_id: Optional[int] = None,
     current_user: User = Depends(get_current_user),
 ) -> Any:
     """
@@ -52,12 +60,25 @@ async def read_jobs(
     stmt = select(Job)
     
     # Base authorization filters
+    # Use Enum comparison directly
+    
     if current_user.role == UserRole.CLIENT:
         stmt = stmt.where(Job.owner_id == current_user.id)
-    elif current_user.role == UserRole.CANDIDATE:
+    
+    if current_user.role == UserRole.CANDIDATE:
         stmt = stmt.where(Job.is_active == True)
 
     # Advanced filters
+    if is_active is not None:
+        # If Admin, they can filter by is_active.
+        # If Client, they can filter by is_active (their own jobs).
+        # If Candidate, they only see active.
+        if current_user.role != UserRole.CANDIDATE:
+             stmt = stmt.where(Job.is_active == is_active)
+
+    if owner_id:
+        stmt = stmt.where(Job.owner_id == owner_id)
+
     if location:
         stmt = stmt.where(Job.location.ilike(f"%{location}%"))
     if job_type:
@@ -72,7 +93,7 @@ async def read_jobs(
             (Job.requirements.ilike(f"%{search}%"))
         )
 
-    stmt = stmt.offset(skip).limit(limit).order_by(Job.created_at.desc())
+    stmt = stmt.offset(skip).limit(limit).order_by(Job.created_at.desc()).options(selectinload(Job.owner))
     
     result = await db.execute(stmt)
     jobs = result.scalars().all()
@@ -88,7 +109,7 @@ async def read_job(
     """
     Get job by ID.
     """
-    stmt = select(Job).where(Job.id == id)
+    stmt = select(Job).options(selectinload(Job.owner)).where(Job.id == id)
     result = await db.execute(stmt)
     job = result.scalars().first()
     if not job:
@@ -106,7 +127,8 @@ async def update_job(
     """
     Update a job.
     """
-    stmt = select(Job).where(Job.id == id)
+    # Eager load owner for permission check and response
+    stmt = select(Job).options(selectinload(Job.owner)).where(Job.id == id)
     result = await db.execute(stmt)
     job = result.scalars().first()
     if not job:
@@ -122,6 +144,12 @@ async def update_job(
     db.add(job)
     await db.commit()
     await db.refresh(job)
+    
+    # Fetch with owner to ensure response model can validate it
+    stmt = select(Job).options(selectinload(Job.owner)).where(Job.id == id)
+    result = await db.execute(stmt)
+    job = result.scalars().first()
+    
     return job
 
 @router.delete("/{id}", response_model=JobResponse)
@@ -134,7 +162,8 @@ async def delete_job(
     """
     Delete a job.
     """
-    stmt = select(Job).where(Job.id == id)
+    # Eager load owner for retrieval and permission check
+    stmt = select(Job).options(selectinload(Job.owner)).where(Job.id == id)
     result = await db.execute(stmt)
     job = result.scalars().first()
     if not job:
@@ -143,9 +172,13 @@ async def delete_job(
     if job.owner_id != current_user.id and current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Not authorized to delete this job")
         
+    # Serialize before deletion to preserve relation data (owner) 
+    # and avoid MissingGreenlet error after commit/expiration.
+    job_response = JobResponse.model_validate(job)
+        
     await db.delete(job)
     await db.commit()
-    return job
+    return job_response
 
 from app.schemas.application import ApplicationResponse
 from sqlalchemy.orm import selectinload
@@ -166,7 +199,7 @@ async def read_job_applications(
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
         
-    if job.owner_id != current_user.id:
+    if job.owner_id != current_user.id and current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Not authorized to view applications for this job")
         
     # We need to load applications and potentially the candidate user info?
@@ -183,13 +216,14 @@ async def read_job_applications(
     from app.models.application import Application
     stmt = select(Application).where(Application.job_id == id).options(
         selectinload(Application.user),
-        selectinload(Application.job)
+        selectinload(Application.job).selectinload(Job.owner)
     )
     result = await db.execute(stmt)
     applications = result.scalars().all()
     
     import json
     for app in applications:
+        app.ai_analysis_json = None
         if app.ai_analysis:
             try:
                 app.ai_analysis_json = json.loads(app.ai_analysis)

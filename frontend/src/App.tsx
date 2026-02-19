@@ -18,6 +18,7 @@ import ApplicationAnalysis from './pages/applications/ApplicationAnalysis';
 import MyApplications from './pages/applications/MyApplications';
 import ManageUsers from './pages/admin/ManageUsers';
 import ManageRoles from './pages/admin/ManageRoles';
+import ManageJobs from './pages/admin/ManageJobs';
 import './App.css';
 
 const DashboardRedirect = () => {
@@ -52,6 +53,7 @@ function App() {
               <Route path="/applications" element={<MyApplications />} />
               <Route path="/admin/users" element={<ManageUsers />} />
               <Route path="/admin/roles" element={<ManageRoles />} />
+              <Route path="/admin/jobs" element={<ManageJobs />} />
             </Route>
           </Route>
         </Routes>

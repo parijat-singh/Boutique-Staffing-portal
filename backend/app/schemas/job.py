@@ -29,5 +29,8 @@ class JobInDBBase(JobBase):
     class Config:
         from_attributes = True
 
+
+from app.schemas.user import User
+
 class JobResponse(JobInDBBase):
-    pass
+    owner: Optional[User] = None

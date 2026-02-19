@@ -1,0 +1,134 @@
+============================= test session starts ==============================
+platform linux -- Python 3.10.19, pytest-9.0.2, pluggy-1.6.0
+rootdir: /app
+configfile: pytest.ini
+plugins: asyncio-1.3.0, anyio-4.12.1
+asyncio: mode=auto, debug=False, asyncio_default_fixture_loop_scope=session, asyncio_default_test_loop_scope=function
+collected 1 item
+
+tests/api/v1/test_jobs_fixes.py DEBUG: Login failed - User not found: client_apps@example.com with role: client
+DEBUG: Login failed - User not found: admin_apps@example.com with role: admin
+DEBUG: Login failed - User not found: candidate_apps@example.com with role: candidate
+Error extracting text from file resume.pdf: Stream has ended unexpectedly
+Warning: Could not extract text from resume.pdf
+F
+
+=================================== FAILURES ===================================
+_________________________ test_application_list_access _________________________
+
+client = <httpx.AsyncClient object at 0x7d20db13ad10>
+
+    @pytest.mark.asyncio
+    async def test_application_list_access(client: AsyncClient):
+        """
+        Verify:
+        - Admin can see applicants (Fix 1).
+        - Client can see applicants for their job.
+        - Candidate CANNOT see applicants.
+        - No 500 error on eager loading (Fix 2).
+        """
+        # Setup
+        client_headers = await get_auth_headers(client, "client_apps@example.com", "client")
+        admin_headers = await get_auth_headers(client, "admin_apps@example.com", "admin")
+        candidate_headers = await get_auth_headers(client, "candidate_apps@example.com", "candidate")
+    
+        # Create Job and Apply
+        job = await create_job(client, client_headers, "App Test Job", is_active=True)
+        job_id = job["id"]
+    
+>       await apply_to_job(client, candidate_headers, job_id)
+
+tests/api/v1/test_jobs_fixes.py:159: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/api/v1/test_jobs_fixes.py:34: in apply_to_job
+    response = await client.post(
+/usr/local/lib/python3.10/site-packages/httpx/_client.py:1859: in post
+    return await self.request(
+/usr/local/lib/python3.10/site-packages/httpx/_client.py:1540: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+/usr/local/lib/python3.10/site-packages/httpx/_client.py:1629: in send
+    response = await self._send_handling_auth(
+/usr/local/lib/python3.10/site-packages/httpx/_client.py:1657: in _send_handling_auth
+    response = await self._send_handling_redirects(
+/usr/local/lib/python3.10/site-packages/httpx/_client.py:1694: in _send_handling_redirects
+    response = await self._send_single_request(request)
+/usr/local/lib/python3.10/site-packages/httpx/_client.py:1730: in _send_single_request
+    response = await transport.handle_async_request(request)
+/usr/local/lib/python3.10/site-packages/httpx/_transports/asgi.py:170: in handle_async_request
+    await self.app(scope, receive, send)
+/usr/local/lib/python3.10/site-packages/fastapi/applications.py:1134: in __call__
+    await super().__call__(scope, receive, send)
+/usr/local/lib/python3.10/site-packages/starlette/applications.py:107: in __call__
+    await self.middleware_stack(scope, receive, send)
+/usr/local/lib/python3.10/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+/usr/local/lib/python3.10/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+/usr/local/lib/python3.10/site-packages/starlette/middleware/cors.py:87: in __call__
+    await self.app(scope, receive, send)
+/usr/local/lib/python3.10/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+/usr/local/lib/python3.10/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/usr/local/lib/python3.10/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/usr/local/lib/python3.10/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+/usr/local/lib/python3.10/site-packages/starlette/routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+/usr/local/lib/python3.10/site-packages/starlette/routing.py:736: in app
+    await route.handle(scope, receive, send)
+/usr/local/lib/python3.10/site-packages/starlette/routing.py:290: in handle
+    await self.app(scope, receive, send)
+/usr/local/lib/python3.10/site-packages/fastapi/routing.py:119: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+/usr/local/lib/python3.10/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/usr/local/lib/python3.10/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/usr/local/lib/python3.10/site-packages/fastapi/routing.py:105: in app
+    response = await f(request)
+/usr/local/lib/python3.10/site-packages/fastapi/routing.py:446: in app
+    content = await serialize_response(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def serialize_response(
+        *,
+        field: ModelField | None = None,
+        response_content: Any,
+        include: IncEx | None = None,
+        exclude: IncEx | None = None,
+        by_alias: bool = True,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        is_coroutine: bool = True,
+        endpoint_ctx: EndpointContext | None = None,
+    ) -> Any:
+        if field:
+            if is_coroutine:
+                value, errors = field.validate(response_content, {}, loc=("response",))
+            else:
+                value, errors = await run_in_threadpool(
+                    field.validate, response_content, {}, loc=("response",)
+                )
+            if errors:
+                ctx = endpoint_ctx or EndpointContext()
+>               raise ResponseValidationError(
+                    errors=errors,
+                    body=response_content,
+                    endpoint_ctx=ctx,
+                )
+E               fastapi.exceptions.ResponseValidationError: 1 validation error:
+E                 {'type': 'get_attribute_error', 'loc': ('response', 'job', 'owner'), 'msg': "Error extracting attribute: MissingGreenlet: greenlet_spawn has not been called; can't call await_only() here. Was IO attempted in an unexpected place? (Background on this error at: https://sqlalche.me/e/20/xd2s)", 'input': <app.models.job.Job object at 0x7d20da7d4310>, 'ctx': {'error': "MissingGreenlet: greenlet_spawn has not been called; can't call await_only() here. Was IO attempted in an unexpected place? (Background on this error at: https://sqlalche.me/e/20/xd2s)"}}
+E               
+E                 File "/app/app/api/v1/endpoints/applications.py", line 17, in create_application
+E                   POST /api/v1/applications/
+
+/usr/local/lib/python3.10/site-packages/fastapi/routing.py:284: ResponseValidationError
+------------------------------ Captured log call -------------------------------
+WARNING  pypdf._reader:_utils.py:457 invalid pdf header: b'dummy'
+WARNING  pypdf._reader:_utils.py:457 EOF marker not found
+=========================== short test summary info ============================
+FAILED tests/api/v1/test_jobs_fixes.py::test_application_list_access - fastap...
+============================== 1 failed in 5.40s ===============================

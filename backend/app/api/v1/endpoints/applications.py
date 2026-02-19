@@ -33,7 +33,7 @@ async def create_application(
         )
 
     # Check if job exists
-    stmt = select(Job).where(Job.id == job_id)
+    stmt = select(Job).options(selectinload(Job.owner)).where(Job.id == job_id)
     result = await db.execute(stmt)
     job = result.scalars().first()
     if not job:
@@ -145,7 +145,9 @@ async def read_my_applications(
         # or just return whatever they have (if any).
         pass
 
-    stmt = select(Application).options(selectinload(Application.job)).where(
+    stmt = select(Application).options(
+        selectinload(Application.job).selectinload(Job.owner)
+    ).where(
         Application.user_id == current_user.id
     ).offset(skip).limit(limit)
     
@@ -176,7 +178,7 @@ async def read_application(
     Candidates can view their own.
     """
     stmt = select(Application).where(Application.id == id).options(
-        selectinload(Application.job),
+        selectinload(Application.job).selectinload(Job.owner),
         selectinload(Application.user)
     )
     result = await db.execute(stmt)
